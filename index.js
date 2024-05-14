@@ -73,8 +73,24 @@ const Model = (() => {
   class cartState extends baseState {
     constructor() {
       super();
-      this.data = []
+      this.data = [];
     }
+  }
+
+  class storageState extends baseState {
+    constructor() {
+      super(); 
+      this.data = [];
+    }
+    set setData(newData){this.data = newData};
+  }
+
+  class pageState extends baseState {
+    constructor() {
+      super(); 
+      this.data = 0; 
+    }
+    set setData(newData){this.data = newData}
   }
 
   const {
@@ -88,6 +104,8 @@ const Model = (() => {
   return {
     invState,
     cartState,
+    storageState,
+    pageState,
     getCart,
     updateCart,
     getInventory,
@@ -99,22 +117,17 @@ const Model = (() => {
 
 const View = (() => {
   // implement your logic for View
-  const renderInventory = (fruitList) => {
+  const renderInventory = (fruit) => {
     const fruitContainer = document.querySelector(".fruit-container");
-    let renderList = "";
-    for (let fruit of fruitList) {
-      const fruitItem = `<div class="format">
-        <span>${fruit.content}</span>
-        <button class="dec${fruit.content} minus">-</button>
-        <span class="cnt${fruit.content}">${fruit.count}</span>
-        <button class="inc${fruit.content} add">+</button>
-        <button class="cart${fruit.content} toCart">add to cart</button>
-      </div>
-      `
-      renderList += fruitItem;
-    }
-
-    fruitContainer.innerHTML = renderList;
+    const fruitItem = `<div class="format">
+      <span>${fruit.content}</span>
+      <button class="dec${fruit.content} minus">-</button>
+      <span class="cnt${fruit.content}">${fruit.count}</span>
+      <button class="inc${fruit.content} add">+</button>
+      <button class="cart${fruit.content} toCart">add to cart</button>
+    </div>
+    `
+    fruitContainer.innerHTML = fruitItem;
   }
 
   const renderCart = (fruitList) => {
@@ -138,15 +151,18 @@ const Controller = ((model, view) => {
   // implement your logic for Controller
   const invState = new model.invState();
   const cartState = new model.cartState();
+  const storageState = new model.storageState(); 
+  const pageState = new model.pageState(); 
 
   const init = () => {
     window.onload = () => {
       model.getInventory().then((res) => {
-          const spreadInventory = res.map((item) => ({...item, "count": 0}));
-          invState.setData = spreadInventory;
-          handleUpdateAmount();
-        }
-      );
+        const spreadInventory = res.map((item) => ({...item, "count": 0}));
+        handlePage(); 
+        storageState.setData = spreadInventory; 
+        invState.setData = storageState.getData[pageState.getData];
+        handleUpdateAmount();
+      });
 
       model.getCart().then((res) => {
         cartState.setData = res;
@@ -161,67 +177,88 @@ const Controller = ((model, view) => {
   };
   
   const handleUpdateAmount = () => {
-    for (let fruit of invState.getData) {
-      const name = fruit.content
-      const dec = document.querySelector(".dec" + name);
-      const inc = document.querySelector(".inc" + name); 
+    const fruit = invState.getData;
+    const name = fruit.content
+    const dec = document.querySelector(".dec" + name);
+    const inc = document.querySelector(".inc" + name); 
 
-      dec.addEventListener("click", (event) => {
-        event.preventDefault();
-        const newFruitList = [...invState.getData];
-        for (let item of newFruitList) if (item.content === name && item.count > 0) --item.count;
-        invState.setData = newFruitList;
-        handleUpdateAmount();
-        handleAddToCart();
-      });
+    dec.addEventListener("click", (event) => {
+      event.preventDefault();
+      const fruit = invState.getData;
+      if (fruit.count === 0) return;
+      --fruit.count;
+      invState.setData = fruit;
+      handleUpdateAmount();
+      handleAddToCart();
+    });
 
-      inc.addEventListener("click", (event) => {
-        event.preventDefault();
-        const newFruitList = [...invState.getData];
-        for (let item of newFruitList) if (item.content === name) ++item.count;
-        invState.setData = newFruitList;
-        handleUpdateAmount();
-        handleAddToCart();
-      });
-    }
+    inc.addEventListener("click", (event) => {
+      event.preventDefault();
+      const fruit = invState.getData;
+      ++fruit.count;
+      invState.setData = fruit;
+      handleUpdateAmount();
+      handleAddToCart();
+    });
   };
 
-  const handleAddToCart = () => {
-    for (let fruit of invState.getData) {
-      const name = fruit.content
-      const cart = document.querySelector(".cart" + name);
+  const handlePage = () => {
+    const prev = document.querySelector(".prev");
+    const next = document.querySelector(".next");
 
-      cart.addEventListener("click", (event) => {
-        event.preventDefault();
-        const fruitInventory = [...invState.getData];
-        for (let item of fruitInventory) {
-          if (item.content !== name || item.count === 0) continue;
-          const fruitCart = [...cartState.getData]; 
-          let flag = false;
-          for (let cartItem of fruitCart) if (cartItem.content === item.content) flag = true; 
-          if (!flag) {
-            model.addToCart(item).then((res) => {
-              const currentCart = cartState.getData;
-              const newCart = [...currentCart, res];
-              cartState.setData = newCart;
-              handleDelete();
-            });
-            break;
-          }
-          for (let cartItem of fruitCart) {
-            if (cartItem.content === item.content) {
-              const newCartItem = {...cartItem, "count": item.count + cartItem.count}
-              model.updateCart(cartItem.id, newCartItem).then((res) => {
-                const currentCart = [...cartState.getData];
-                for (let item of currentCart) if (item.content === res.content) item.count = res.count;
-                cartState.setData = currentCart;
-                handleDelete();
-              });
-            }
-          }
+    prev.addEventListener("click", (event) => {
+      event.preventDefault(); 
+      if (pageState.getData === 0) return; 
+      const newPage = --pageState.getData;
+      pageState.setData = newPage;
+      invState.setData = storageState.getData[newPage];
+      handleUpdateAmount(); 
+      handleAddToCart();
+    })
+
+    next.addEventListener("click", (event) => {
+      event.preventDefault(); 
+      if (pageState.getData === storageState.getData.length - 1) return; 
+      const newPage = ++pageState.getData;
+      pageState.setData = newPage;
+      invState.setData = storageState.getData[newPage];
+      handleUpdateAmount(); 
+      handleAddToCart();
+    })
+  }
+
+  const handleAddToCart = () => {
+    const fruit = invState.getData;
+    const name = fruit.content
+    const cart = document.querySelector(".cart" + name);
+
+    cart.addEventListener("click", (event) => {
+      event.preventDefault();
+      if (fruit.count === 0) return;
+      const fruitCart = [...cartState.getData]; 
+      let flag = false;
+      for (let cartItem of fruitCart) if (cartItem.content === fruit.content) flag = true; 
+      if (!flag) {
+        model.addToCart(fruit).then((res) => {
+          const currentCart = cartState.getData;
+          const newCart = [...currentCart, res];
+          cartState.setData = newCart;
+          handleDelete();
+        });
+        return;
+      }
+      for (let cartItem of fruitCart) {
+        if (cartItem.content === fruit.content) {
+          const newCartItem = {...cartItem, "count": fruit.count + cartItem.count}
+          model.updateCart(cartItem.id, newCartItem).then((res) => {
+            const currentCart = [...cartState.getData];
+            for (let item of currentCart) if (item.content === res.content) item.count = res.count;
+            cartState.setData = currentCart;
+            handleDelete();
+          });
         }
-      });
-    }
+      }
+    });
   };
 
   const handleDelete = () => {

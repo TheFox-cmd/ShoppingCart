@@ -1,5 +1,26 @@
 {
-  "cart": [],
+  "cart": [
+    {
+      "content": "banana",
+      "id": 3,
+      "count": 33702339936256
+    },
+    {
+      "content": "watermelon",
+      "id": 4,
+      "count": 33702339936265
+    },
+    {
+      "content": "apple",
+      "id": 1,
+      "count": 33702339936305
+    },
+    {
+      "content": "strawberry",
+      "id": 5,
+      "count": 33702339936256
+    }
+  ],
   "inventory": [
     {
       "content": "apple",
@@ -16,6 +37,10 @@
     {
       "content": "watermelon",
       "id": 4
+    },
+    {
+      "content": "strawberry",
+      "id": 5
     }
   ]
 }

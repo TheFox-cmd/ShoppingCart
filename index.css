@@ -52,7 +52,7 @@ span{
   background-color: rgb(218, 62, 0);
 }
 
-.toCart, .del{
+.toCart, .del, .prev, .next{
   background-color: rgb(7, 92, 189);
 }
 
@@ -66,6 +66,15 @@ span{
   width: 90%;
   height: 4vh;
   background-color: rgba(0, 0, 0, 0.911);
+  position: absolute;
+  left: 0;
+  bottom:0;
+}
+
+.button-container{
+  margin-left: 5%;
+  width: 90%;
+  height: 4vh;
   position: absolute;
   left: 0;
   bottom:0;
