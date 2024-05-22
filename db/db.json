@@ -1,46 +1,51 @@
 {
   "cart": [
     {
-      "content": "banana",
-      "id": 3,
-      "count": 33702339936256
-    },
-    {
-      "content": "watermelon",
-      "id": 4,
-      "count": 33702339936265
-    },
-    {
+      "id": "1",
       "content": "apple",
-      "id": 1,
-      "count": 33702339936305
+      "count": 2060134823919
     },
     {
+      "id": "2",
+      "content": "peach",
+      "count": 84
+    },
+    {
+      "id": "3",
+      "content": "banana",
+      "count": 72
+    },
+    {
+      "id": "4",
+      "content": "watermelon",
+      "count": 341
+    },
+    {
+      "id": "5",
       "content": "strawberry",
-      "id": 5,
-      "count": 33702339936256
+      "count": 132
     }
   ],
   "inventory": [
     {
       "content": "apple",
-      "id": 1
+      "id": "1"
     },
     {
       "content": "peach",
-      "id": 2
+      "id": "2"
     },
     {
       "content": "banana",
-      "id": 3
+      "id": "3"
     },
     {
       "content": "watermelon",
-      "id": 4
+      "id": "4"
     },
     {
       "content": "strawberry",
-      "id": 5
+      "id": "5"
     }
   ]
 }
